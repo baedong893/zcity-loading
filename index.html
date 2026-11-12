@@ -59,12 +59,31 @@
 		-webkit-transition: width 0.4s; transition: width 0.4s; }
 	#percent { position: absolute; right: 0; top: 0; font-size: 16px; color: #c9ced6; }
 	#hint { margin-top: 10px; font-size: 13px; color: #6f7784; }
+
+	#collection { position: absolute; right: 0; top: 0; text-align: right; }
+	#collection a.button {
+		display: inline-block; padding: 14px 22px;
+		background: #c8312f; color: #ffffff; text-decoration: none;
+		font-size: 18px; font-weight: 700; letter-spacing: 1px;
+		border: 1px solid rgba(255, 255, 255, 0.25);
+	}
+	#collection a.button:hover { background: #e03b38; }
+	#collection a.web { display: inline-block; margin-top: 8px; font-size: 13px; color: #9aa1ad; }
+	#collection .url { margin-top: 6px; font-size: 13px; color: #d4a24a; }
 </style>
 </head>
 <body>
 <div id="bg"></div>
 <div id="scan"></div>
 <div id="wrap">
+	<!-- steam:// opens the collection in the Steam client (works while the game is loading);
+	     the https link and the printed address are the fallback. -->
+	<div id="collection">
+		<a class="button" href="steam://url/CommunityFilePage/3737337586">모음집 구독하기</a><br>
+		<a class="web" href="https://steamcommunity.com/sharedfiles/filedetails/?id=3737337586" target="_blank">웹에서 열기</a>
+		<div class="url">steamcommunity.com/sharedfiles/filedetails/?id=3737337586</div>
+	</div>
+
 	<div id="brand">Z-<span>CITY</span></div>
 	<div id="tagline">한국어 서버 · Korean Localization</div>
 
@@ -84,7 +103,7 @@
 		<div id="status">서버에 접속하는 중...</div>
 		<div id="file">&nbsp;</div>
 		<div id="bar"><div id="fill"></div></div>
-		<div id="hint">처음 접속할 때는 콘텐츠를 받느라 오래 걸릴 수 있습니다. 모음집(창작마당 3737337586)을 구독하면 훨씬 빨라집니다.</div>
+		<div id="hint">처음 접속할 때는 콘텐츠를 받느라 오래 걸릴 수 있습니다. 오른쪽 위 버튼으로 모음집을 구독하면 다음부터 훨씬 빨라집니다.</div>
 	</div>
 </div>
 
