@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Z-City</title>
+<!--
+	Z-City loading screen (sv_loadingurl). Garry's Mod may show this in an old
+	embedded browser, so the CSS avoids variables/grid/clamp and the script is ES5.
+	Garry's Mod calls: GameDetails, SetFilesTotal, SetFilesNeeded, DownloadingFile, SetStatusChanged.
+-->
+<style>
+	html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+	body {
+		background: #07080a;
+		color: #eef0f3;
+		font-family: "Malgun Gothic", "맑은 고딕", "Noto Sans KR", "Segoe UI", Arial, sans-serif;
+	}
+	#bg {
+		position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+		background: #07080a;
+		background-image: -webkit-radial-gradient(18% 22%, circle, rgba(150, 28, 28, 0.35), rgba(7, 8, 10, 0) 45%),
+			-webkit-radial-gradient(85% 90%, circle, rgba(200, 150, 60, 0.12), rgba(7, 8, 10, 0) 40%);
+		background-image: radial-gradient(circle at 18% 22%, rgba(150, 28, 28, 0.35), rgba(7, 8, 10, 0) 45%),
+			radial-gradient(circle at 85% 90%, rgba(200, 150, 60, 0.12), rgba(7, 8, 10, 0) 40%);
+	}
+	#scan {
+		position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+		background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.025) 1px, rgba(0, 0, 0, 0) 1px);
+		background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, rgba(0, 0, 0, 0) 1px);
+		background-size: 100% 4px;
+	}
+	#wrap { position: absolute; left: 6%; right: 6%; top: 9%; bottom: 8%; }
+
+	#brand { font-size: 84px; font-weight: 800; letter-spacing: 6px; line-height: 1; color: #f4f5f7; }
+	#brand span { color: #c8312f; }
+	#tagline { margin-top: 10px; font-size: 18px; color: #9aa1ad; letter-spacing: 1px; }
+
+	#details { margin-top: 36px; }
+	.detail { display: inline-block; margin: 0 34px 12px 0; vertical-align: top; }
+	.detail .label { font-size: 12px; color: #7d8592; letter-spacing: 2px; text-transform: uppercase; }
+	.detail .value { margin-top: 4px; font-size: 22px; color: #e9ecf1; }
+
+	#tipbox {
+		position: absolute; left: 0; right: 0; bottom: 120px;
+		padding: 20px 24px;
+		border-left: 4px solid #c8312f;
+		background: rgba(14, 16, 20, 0.82);
+	}
+	#tiptitle { font-size: 13px; color: #d4a24a; letter-spacing: 2px; }
+	#tip { margin-top: 8px; font-size: 21px; line-height: 1.5; color: #e2e5ea; min-height: 32px;
+		-webkit-transition: opacity 0.5s; transition: opacity 0.5s; }
+
+	#bottom { position: absolute; left: 0; right: 0; bottom: 0; }
+	#status { font-size: 16px; color: #c9ced6; }
+	#file { margin-top: 4px; font-size: 13px; color: #737b88; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	#bar { position: relative; margin-top: 12px; height: 8px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+	#fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: #c8312f;
+		-webkit-transition: width 0.4s; transition: width 0.4s; }
+	#percent { position: absolute; right: 0; top: 0; font-size: 16px; color: #c9ced6; }
+	#hint { margin-top: 10px; font-size: 13px; color: #6f7784; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="scan"></div>
+<div id="wrap">
+	<div id="brand">Z-<span>CITY</span></div>
+	<div id="tagline">한국어 서버 · Korean Localization</div>
+
+	<div id="details">
+		<div class="detail"><div class="label">서버</div><div class="value" id="server">Z-City</div></div>
+		<div class="detail"><div class="label">맵</div><div class="value" id="map">-</div></div>
+		<div class="detail"><div class="label">최대 인원</div><div class="value" id="players">-</div></div>
+	</div>
+
+	<div id="tipbox">
+		<div id="tiptitle">TIP</div>
+		<div id="tip"></div>
+	</div>
+
+	<div id="bottom">
+		<div id="percent"></div>
+		<div id="status">서버에 접속하는 중...</div>
+		<div id="file">&nbsp;</div>
+		<div id="bar"><div id="fill"></div></div>
+		<div id="hint">처음 접속할 때는 콘텐츠를 받느라 오래 걸릴 수 있습니다. 모음집(창작마당 3737337586)을 구독하면 훨씬 빨라집니다.</div>
+	</div>
+</div>
+
+<script>
+	var TIPS = [
+		"알포인트: 분대 안에 씐 자가 숨어 있습니다. 마지막에 열리는 철수 지점에 살아서 도착하세요.",
+		"존 윅: 근접무기를 들고 우클릭하면 조준한 암살자에게 유도되는 투척을 합니다.",
+		"존 윅: CZ75는 한 번 당기면 두 발이 나갑니다. 정밀 사격이면 심장과 머리를 노립니다.",
+		"공포모드: 죽은 뒤에도 좌클릭으로 유령이 되어 생존자를 괴롭힐 수 있습니다.",
+		"좀비모드: 감염되면 숫자 키로 좀비 종류를 고르고, G로 질주합니다.",
+		"배틀그라운드: 나침반과 미니맵에 다음 자기장, 보급, 레드존이 표시됩니다.",
+		"레이븐홈 / 17번 지구: 좀비와 시민보호 기동대를 피해 끝까지 살아남으세요.",
+		"전체 채팅은 메시지 앞에 // 를 붙이면 1분에 한 번 보낼 수 있습니다.",
+		"라운드가 끝나면 거리와 상관없이 모두와 채팅·음성 대화를 할 수 있습니다.",
+		"2차대전 독일·소련 총기가 추가되었습니다."
+	];
+	var tipIndex = Math.floor(Math.random() * TIPS.length);
+	var totalFiles = 0;
+	var neededFiles = 0;
+
+	function byId(id) { return document.getElementById(id); }
+	function setText(id, text) { var el = byId(id); if (el) { el.innerHTML = ""; el.appendChild(document.createTextNode(text)); } }
+
+	function showTip() {
+		var el = byId("tip");
+		el.style.opacity = 0;
+		setTimeout(function () {
+			setText("tip", TIPS[tipIndex]);
+			el.style.opacity = 1;
+			tipIndex = (tipIndex + 1) % TIPS.length;
+		}, 450);
+	}
+
+	function updateProgress() {
+		if (totalFiles <= 0) return;
+		var done = Math.max(totalFiles - neededFiles, 0);
+		var pct = Math.min(Math.round(done / totalFiles * 100), 100);
+		byId("fill").style.width = pct + "%";
+		setText("percent", pct + "%  (" + done + " / " + totalFiles + ")");
+	}
+
+	// Called by Garry's Mod.
+	function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+		if (servername) setText("server", servername);
+		if (mapname) setText("map", mapname);
+		if (maxplayers) setText("players", maxplayers + "명");
+	}
+	function SetFilesTotal(total) { totalFiles = Number(total) || 0; updateProgress(); }
+	function SetFilesNeeded(needed) { neededFiles = Number(needed) || 0; updateProgress(); }
+	function DownloadingFile(fileName) { setText("file", "받는 중: " + fileName); }
+	function SetStatusChanged(status) { if (status) setText("status", status); }
+
+	showTip();
+	setInterval(showTip, 7000);
+</script>
+</body>
+</html>
