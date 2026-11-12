@@ -70,6 +70,12 @@
 	#collection a.button:hover { background: #e03b38; }
 	#collection a.web { display: inline-block; margin-top: 8px; font-size: 13px; color: #9aa1ad; }
 	#collection .url { margin-top: 6px; font-size: 13px; color: #d4a24a; }
+	/* Narrow windows: put the button above the logo instead of over it. */
+	@media (max-width: 900px) {
+		#collection { position: static; text-align: left; margin-bottom: 24px; }
+		#brand { font-size: 56px; }
+		#tipbox { bottom: 150px; }
+	}
 </style>
 </head>
 <body>
