@@ -52,7 +52,8 @@
 		-webkit-transition: opacity 0.5s; transition: opacity 0.5s; }
 
 	#bottom { position: absolute; left: 0; right: 0; bottom: 0; }
-	#status { font-size: 16px; color: #c9ced6; }
+	/* Long workshop lines stop before the percent/stage text on the right. */
+	#status { margin-right: 340px; font-size: 16px; color: #c9ced6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 	#file { margin-top: 4px; font-size: 13px; color: #737b88; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 	#bar { position: relative; margin-top: 12px; height: 8px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
 	#fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: #c8312f;
@@ -70,6 +71,8 @@
 		#collection { position: static; margin-bottom: 24px; }
 		#brand { font-size: 56px; }
 		#tipbox { bottom: 150px; }
+		#percent { position: static; margin-bottom: 4px; }
+		#status { margin-right: 0; }
 	}
 </style>
 </head>
