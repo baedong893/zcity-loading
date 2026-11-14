@@ -122,9 +122,31 @@
 		"2차대전 독일·소련 총기가 추가되었습니다."
 	];
 	var tipIndex = Math.floor(Math.random() * TIPS.length);
+
+	// Progress: Garry's Mod only reports file counts for the FastDL step, which made
+	// the bar sit at 1% through the workshop step and then jump. The load is split
+	// into stages (recognised from the status text) with a share of the bar each;
+	// inside a stage the bar follows real counts when there are any (workshop
+	// "3/57", files left) and otherwise creeps slowly towards the stage's end, so
+	// it always moves and never goes backwards. It stops short of 100%: the screen
+	// closes when loading is done.
+	var STAGES = [
+		{ name: "접속", from: 0, to: 4, tau: 4 },
+		{ name: "워크샵 애드온", from: 4, to: 55, tau: 40 },
+		{ name: "서버 정보", from: 55, to: 60, tau: 4 },
+		{ name: "파일 받기", from: 60, to: 80, tau: 15 },
+		{ name: "Lua 받기", from: 80, to: 92, tau: 10 },
+		{ name: "게임 시작", from: 92, to: 99, tau: 12 }
+	];
+	var stage = 0;
+	var stageStart = new Date().getTime();
+	var shown = 0;
 	var totalFiles = 0;
 	var neededFiles = 0;
+	var downloaded = 0;
+	var wsDone = 0, wsTotal = 0, wsItemPct = 0, wsChanged = 0;
 
+	function now() { return new Date().getTime(); }
 	function byId(id) { return document.getElementById(id); }
 	function setText(id, text) { var el = byId(id); if (el) { el.innerHTML = ""; el.appendChild(document.createTextNode(text)); } }
 
@@ -138,12 +160,59 @@
 		}, 450);
 	}
 
-	function updateProgress() {
-		if (totalFiles <= 0) return;
-		var done = Math.max(totalFiles - neededFiles, 0);
-		var pct = Math.min(Math.round(done / totalFiles * 100), 100);
-		byId("fill").style.width = pct + "%";
-		setText("percent", pct + "%  (" + done + " / " + totalFiles + ")");
+	function goStage(i) {
+		if (i > stage && i < STAGES.length) { stage = i; stageStart = now(); }
+	}
+
+	// 0..1 that approaches 1 over time (never reaches it).
+	function creep(sinceMs, tau) { return 1 - Math.exp(-sinceMs / 1000 / tau); }
+
+	// How far through the current stage we are, 0..1.
+	function stageFraction() {
+		var s = STAGES[stage], t = now();
+		if (stage === 1 && wsTotal > 0) {
+			// Finished addons, plus the current one (its own % if given, else creeping).
+			var item = wsItemPct > 0 ? wsItemPct / 100 : creep(t - wsChanged, 8) * 0.9;
+			return Math.min((Math.max(wsDone - 1, 0) + item) / wsTotal, 1);
+		}
+		if (stage === 3 && totalFiles > 0) {
+			var done = Math.max(totalFiles - neededFiles, downloaded, 0);
+			var f = Math.min(done / totalFiles, 1);
+			// Creep a little towards the next file so long downloads don't look stuck.
+			return Math.min(f + (1 - f) * creep(t - stageStart, s.tau) * 0.15, 1);
+		}
+		return creep(t - stageStart, s.tau) * 0.95;
+	}
+
+	function render() {
+		var s = STAGES[stage];
+		var target = s.from + (s.to - s.from) * stageFraction();
+		// Glide towards the target; only ever forwards.
+		if (target > shown) shown = Math.min(shown + Math.max((target - shown) * 0.2, 0.05), target);
+		if (shown > 99) shown = 99;
+		byId("fill").style.width = shown.toFixed(1) + "%";
+
+		var detail = s.name + " (" + (stage + 1) + "/" + STAGES.length + ")";
+		if (stage === 1 && wsTotal > 0) detail = s.name + " " + wsDone + " / " + wsTotal;
+		if (stage === 3 && totalFiles > 0) detail = s.name + " " + Math.max(totalFiles - neededFiles, downloaded, 0) + " / " + totalFiles;
+		setText("percent", Math.floor(shown) + "%  ·  " + detail);
+	}
+
+	// Which stage a status text belongs to (-1: can't tell, keep the current one).
+	function stageOf(text) {
+		// Workshop lines start with a counter; quoted addon names are left out of the
+		// keyword check (a name like 'Lua Vehicles' must not look like the Lua step).
+		if (/^\s*\d+\s*\/\s*\d+/.test(text)) return 1;
+		var t = text.replace(/'[^']*'|"[^"]*"/g, "").toLowerCase();
+		if (/lua started|parsing game|game info|precach/.test(t)) return 5;
+		if (/lua|received all|no files to request/.test(t)) return 4;
+		if (/client info|sending/.test(t)) return 2;
+		if (/workshop complete/.test(t)) return 2;
+		if (/^\s*\d+\s*\/\s*\d+|workshop|addon|mount|워크샵|애드온/.test(t)) return 1;
+		// Before the server-info step a download is a workshop addon, after it a FastDL file.
+		if (/download|files|파일/.test(t)) return stage < 2 ? 1 : 3;
+		if (/retriev|server info|connect|접속/.test(t)) return 0;
+		return -1;
 	}
 
 	// Called by Garry's Mod.
@@ -152,13 +221,42 @@
 		if (mapname) setText("map", mapname);
 		if (maxplayers) setText("players", maxplayers + "명");
 	}
-	function SetFilesTotal(total) { totalFiles = Number(total) || 0; updateProgress(); }
-	function SetFilesNeeded(needed) { neededFiles = Number(needed) || 0; updateProgress(); }
-	function DownloadingFile(fileName) { setText("file", "받는 중: " + fileName); }
-	function SetStatusChanged(status) { if (status) setText("status", status); }
+	function SetFilesTotal(total) {
+		totalFiles = Number(total) || 0;
+		if (totalFiles > 0 && stage >= 2) goStage(3);
+	}
+	function SetFilesNeeded(needed) {
+		neededFiles = Number(needed) || 0;
+		if (neededFiles > 0 && stage >= 2) goStage(3);
+	}
+	function DownloadingFile(fileName) {
+		downloaded++;
+		setText("file", "받는 중: " + fileName);
+		if (stage >= 2) goStage(3);
+	}
+	function SetStatusChanged(status) {
+		if (!status) return;
+		setText("status", status);
+		var text = String(status);
+		var i = stageOf(text);
+		if (i >= 0) goStage(i);
+		if (stage === 1) {
+			// "3/57 (12.4 MB) - Downloading 'name'": counts only from the start of the
+			// text (addon names can contain "1/3" themselves).
+			var m = /^\s*(\d+)\s*\/\s*(\d+)/.exec(text);
+			if (m) {
+				var d = Number(m[1]), n = Number(m[2]);
+				if (n > 0 && (d !== wsDone || n !== wsTotal)) { wsDone = d; wsTotal = n; wsChanged = now(); wsItemPct = 0; }
+			}
+			var p = /(\d{1,3})\s*%/.exec(text);
+			if (p) wsItemPct = Math.min(Number(p[1]), 100);
+		}
+	}
 
 	showTip();
 	setInterval(showTip, 7000);
+	render();
+	setInterval(render, 100);
 </script>
 </body>
 </html>
