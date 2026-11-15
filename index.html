@@ -8,6 +8,8 @@
 	Z-City loading screen (sv_loadingurl). Garry's Mod may show this in an old
 	embedded browser, so the CSS avoids variables/grid/clamp and the script is ES5.
 	Garry's Mod calls: GameDetails, SetFilesTotal, SetFilesNeeded, DownloadingFile, SetStatusChanged.
+	Text is in Korean, English, Russian or Chinese, following the player's
+	gmod_language (see TEXT in the script).
 -->
 <style>
 	html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
@@ -16,6 +18,8 @@
 		color: #eef0f3;
 		font-family: "Malgun Gothic", "맑은 고딕", "Noto Sans KR", "Segoe UI", Arial, sans-serif;
 	}
+	body.lang-zh { font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", "Malgun Gothic", Arial, sans-serif; }
+	body.lang-en, body.lang-ru { font-family: "Segoe UI", Arial, "Malgun Gothic", sans-serif; }
 	#bg {
 		position: absolute; left: 0; top: 0; right: 0; bottom: 0;
 		background: #07080a;
@@ -64,7 +68,7 @@
 	#collection { position: absolute; right: 0; top: 0; width: 260px; text-align: center; }
 	#qr { display: block; margin: 0 auto; width: 210px; height: 210px; border: 1px solid rgba(255, 255, 255, 0.25);
 		-webkit-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); }
-	#collection .qrcap { margin-top: 10px; font-size: 15px; font-weight: 700; color: #f1f2f4; white-space: nowrap; }
+	#collection .qrcap { margin-top: 10px; font-size: 15px; font-weight: 700; color: #f1f2f4; line-height: 1.35; }
 	#collection .url { margin-top: 4px; font-size: 11px; color: #d4a24a; word-wrap: break-word; }
 	/* Narrow windows: put the button above the logo instead of over it. */
 	@media (max-width: 900px) {
@@ -84,7 +88,7 @@
 	     collection is offered as a QR code to scan with a phone. -->
 	<div id="collection">
 		<img id="qr" alt="모음집 QR" src="data:image/png;base64,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u6eVBxhPecczWEEwYanIBOTrqJzv4jfof3b/Cw73gTx2lK/f7mXA52jABxISEjJ+o/HJGOznWtNnULavqYlxynPPnazOn4SEhISEhISEhISEhFy+v2tmX5zePNRRz1iS98mMlVo/CQkJCQkJCQkJCQkJGUsOSMqe+xhn7MdaBmdV1s4c21afWQbrM4tyhYSEhISEhISEhISEjJXjk7Uxt7Q0zu4og714SmIObDmjN40z9o9VrpCQkJCQkJCQkJCQkDFtr8fW2GBmzmrtjDf29vs5Z43k6BrlCgkJCQkJCQkJCQkJObefzM5tHc2Fzcx9rYO5rq01k2UwpqqfhISEhISEhISEhISEjOnzXUtjbLI25qWO5qT2HrMketY66BtrZ19X5QoJCQkJCQkJCQkJCRnTxydL4iyP0bhm6cyjzayTLIk9eTI9pXKFhISEhISEhISEhISct79r6ey5E4N1jtn+L85Yu5lZJ2m+KyQkJCQkJCQkJCQk5HWcFxKdOao1sR9Otr9szZEdpRqfhISEhISEhISEhISEjGs6LyQGfWBpzFPN7M8anY/LYH5tTYxlKldISEhISEhISEhISMh1+/FEci3k+36v1xOWzhzWOth3pyQfJ+zHAwkJCQkJCQkJCQkJubSffOpc/Jyc/9obNxyd91EG+8jGGeddKldISEhISEhISEhISMh5/eQ/fWOvz9waSyyN22JjjDHiv2OOrZ7w/e2t8VLzXSEhISEhISEhISEhIa+jnzztH587ax9Lcg1jdPaGzcxlHT1Ob76tcoWEhISEhISEhISEhJzXT8ag98vs+RqdcyK37l8aH2/dVpM9qXKFhISEhISEhISEhIS8nn6yN681s9drSZz/kZkP2+o9lSskJCQkJCQkJCQkJGRMP3/yKdrrJ5+T/d8550y2+s3RPq6ZfXqUKyQkJCQkJCQkJCQk5Nx+Mjr7u0ZiPWMZ9H+1c91oXWRtzLntnW2iXCEhISEhISEhISEhIUVERERERERERERERERERERERERERERERERERERkkP8BZsSfb/dHWtAAAAAASUVORK5CYII=">
-		<div class="qrcap">휴대폰으로 찍어서 모음집 구독</div>
+		<div class="qrcap" id="qrcap">휴대폰으로 찍어서 모음집 구독</div>
 		<div class="url">steamcommunity.com/sharedfiles/filedetails/?id=3737337586</div>
 	</div>
 
@@ -92,9 +96,9 @@
 	<div id="tagline">한국어 서버 · Korean Localization</div>
 
 	<div id="details">
-		<div class="detail"><div class="label">서버</div><div class="value" id="server">Z-City</div></div>
-		<div class="detail"><div class="label">맵</div><div class="value" id="map">-</div></div>
-		<div class="detail"><div class="label">최대 인원</div><div class="value" id="players">-</div></div>
+		<div class="detail"><div class="label" id="lbl_server">서버</div><div class="value" id="server">Z-City</div></div>
+		<div class="detail"><div class="label" id="lbl_map">맵</div><div class="value" id="map">-</div></div>
+		<div class="detail"><div class="label" id="lbl_players">최대 인원</div><div class="value" id="players">-</div></div>
 	</div>
 
 	<div id="tipbox">
@@ -112,19 +116,110 @@
 </div>
 
 <script>
-	var TIPS = [
-		"알포인트: 분대 안에 씐 자가 숨어 있습니다. 마지막에 열리는 철수 지점에 살아서 도착하세요.",
-		"존 윅: 근접무기를 들고 우클릭하면 조준한 암살자에게 유도되는 투척을 합니다.",
-		"존 윅: CZ75는 한 번 당기면 두 발이 나갑니다. 정밀 사격이면 심장과 머리를 노립니다.",
-		"공포모드: 죽은 뒤에도 좌클릭으로 유령이 되어 생존자를 괴롭힐 수 있습니다.",
-		"좀비모드: 감염되면 숫자 키로 좀비 종류를 고르고, G로 질주합니다.",
-		"배틀그라운드: 나침반과 미니맵에 다음 자기장, 보급, 레드존이 표시됩니다.",
-		"레이븐홈 / 17번 지구: 좀비와 시민보호 기동대를 피해 끝까지 살아남으세요.",
-		"전체 채팅은 메시지 앞에 // 를 붙이면 1분에 한 번 보낼 수 있습니다.",
-		"라운드가 끝나면 거리와 상관없이 모두와 채팅·음성 대화를 할 수 있습니다.",
-		"2차대전 독일·소련 총기가 추가되었습니다."
-	];
-	var tipIndex = Math.floor(Math.random() * TIPS.length);
+	// Text in the player's Garry's Mod menu language: GameDetails passes
+	// gmod_language ("ko", "en", "ru", "zh-CN", ...). Until it arrives the page is
+	// in Korean (or the browser's language if that is Korean/Russian/Chinese); a
+	// language without a translation gets English. ?lang=ko|en|ru|zh forces one.
+	var TEXT = {
+		ko: {
+			tagline: "한국어 서버 · Korean Localization",
+			qrAlt: "모음집 QR",
+			qrcap: "휴대폰으로 찍어서 모음집 구독",
+			server: "서버", map: "맵", players: "최대 인원", playersValue: "%n명",
+			tipTitle: "TIP",
+			connecting: "서버에 접속하는 중...",
+			downloading: "받는 중: ",
+			hint: "처음 접속할 때는 콘텐츠를 받느라 오래 걸릴 수 있습니다. 오른쪽 위 QR 코드를 휴대폰으로 찍어 모음집을 구독하면 다음부터 훨씬 빨라집니다.",
+			stages: ["접속", "워크샵 애드온", "서버 정보", "파일 받기", "Lua 받기", "게임 시작"],
+			tips: [
+				"알포인트: 분대 안에 씐 자가 숨어 있습니다. 마지막에 열리는 철수 지점에 살아서 도착하세요.",
+				"존 윅: 근접무기를 들고 우클릭하면 조준한 암살자에게 유도되는 투척을 합니다.",
+				"존 윅: CZ75는 한 번 당기면 두 발이 나갑니다. 정밀 사격이면 심장과 머리를 노립니다.",
+				"공포모드: 죽은 뒤에도 좌클릭으로 유령이 되어 생존자를 괴롭힐 수 있습니다.",
+				"좀비모드: 감염되면 숫자 키로 좀비 종류를 고르고, G로 질주합니다.",
+				"배틀그라운드: 나침반과 미니맵에 다음 자기장, 보급, 레드존이 표시됩니다.",
+				"레이븐홈 / 17번 지구: 좀비와 시민보호 기동대를 피해 끝까지 살아남으세요.",
+				"전체 채팅은 메시지 앞에 // 를 붙이면 1분에 한 번 보낼 수 있습니다.",
+				"라운드가 끝나면 거리와 상관없이 모두와 채팅·음성 대화를 할 수 있습니다.",
+				"2차대전 독일·소련 총기가 추가되었습니다."
+			]
+		},
+		en: {
+			tagline: "Korean Server · Korean Localization",
+			qrAlt: "Collection QR",
+			qrcap: "Scan with your phone to subscribe",
+			server: "Server", map: "Map", players: "Max players", playersValue: "%n",
+			tipTitle: "TIP",
+			connecting: "Connecting to the server...",
+			downloading: "Downloading: ",
+			hint: "Your first visit can take a while because of the content download. Scan the QR code at the top right with your phone and subscribe to the collection to load much faster next time.",
+			stages: ["Connecting", "Workshop addons", "Server info", "Downloading files", "Downloading Lua", "Starting game"],
+			tips: [
+				"R-Point: someone in your squad is possessed. Reach the extraction zone alive when it opens at the end.",
+				"John Wick: right-click with a melee weapon to throw it; it homes in on the assassin you aim at.",
+				"John Wick: the CZ75 fires two rounds per trigger pull. A precision shot goes for the heart and the head.",
+				"Fear: after you die, left-click to rise as a ghost and haunt the survivors.",
+				"Zombie mode: once infected, pick your zombie type with the number keys and sprint with G.",
+				"Battlegrounds: the compass and minimap show the next zone, supply drops and red zones.",
+				"Ravenholm / City 17: survive the zombies and Civil Protection to the very end.",
+				"Start a message with // to send it to everyone (once a minute).",
+				"When the round ends, everyone can text and voice chat with everyone, however far apart.",
+				"WWII German and Soviet guns have been added."
+			]
+		},
+		ru: {
+			tagline: "Корейский сервер · Korean Localization",
+			qrAlt: "QR коллекции",
+			qrcap: "Сканируйте телефоном и подпишитесь",
+			server: "Сервер", map: "Карта", players: "Макс. игроков", playersValue: "%n",
+			tipTitle: "СОВЕТ",
+			connecting: "Подключение к серверу...",
+			downloading: "Загрузка: ",
+			hint: "Первое подключение может занять время из-за загрузки контента. Отсканируйте QR-код справа вверху телефоном и подпишитесь на коллекцию: в следующий раз загрузка будет намного быстрее.",
+			stages: ["Подключение", "Аддоны мастерской", "Данные сервера", "Загрузка файлов", "Загрузка Lua", "Запуск игры"],
+			tips: [
+				"R-Point: в отряде прячется одержимый. Доберитесь живыми до точки эвакуации, когда она откроется в конце.",
+				"Джон Уик: с холодным оружием нажмите ПКМ, чтобы метнуть его; оно наводится на убийцу в прицеле.",
+				"Джон Уик: CZ75 стреляет двумя патронами за нажатие. Точный выстрел бьёт в сердце и в голову.",
+				"Страх: после смерти нажмите ЛКМ, чтобы восстать призраком и мучить выживших.",
+				"Режим зомби: после заражения выберите вид зомби цифровыми клавишами, G — рывок.",
+				"Королевская битва: компас и мини-карта показывают следующую зону, припасы и красные зоны.",
+				"Рейвенхольм / Сити 17: выживите до конца среди зомби и Гражданской обороны.",
+				"Начните сообщение с //, чтобы отправить его всем (раз в минуту).",
+				"После окончания раунда все могут общаться в чате и голосом на любом расстоянии.",
+				"Добавлено оружие Германии и СССР времён Второй мировой."
+			]
+		},
+		zh: {
+			tagline: "韩国服务器 · Korean Localization",
+			qrAlt: "合集二维码",
+			qrcap: "用手机扫码订阅合集",
+			server: "服务器", map: "地图", players: "最大人数", playersValue: "%n 人",
+			tipTitle: "提示",
+			connecting: "正在连接服务器...",
+			downloading: "正在下载：",
+			hint: "首次进入需要下载内容，可能较慢。用手机扫描右上角的二维码订阅合集，下次加载会快得多。",
+			stages: ["连接", "创意工坊模组", "服务器信息", "下载文件", "下载 Lua", "进入游戏"],
+			tips: [
+				"R点：小队中藏着一名被附身者。最后撤离点开放时，活着抵达那里。",
+				"约翰·威克：手持近战武器按右键投掷，会追踪你瞄准的刺客。",
+				"约翰·威克：CZ75 每扣一次扳机射出两发。精准射击会瞄准心脏和头部。",
+				"恐惧模式：死后按左键可化为幽灵，继续骚扰幸存者。",
+				"僵尸模式：被感染后用数字键选择僵尸种类，按 G 冲刺。",
+				"大逃杀：指南针和小地图会显示下一个安全区、空投和轰炸区。",
+				"渡鸦镇 / 17号城市：躲开僵尸和公民保护队，坚持活到最后。",
+				"在消息前加上 // 即可发送全体聊天（每分钟一次）。",
+				"回合结束后，无论距离远近，所有人都可以文字和语音交流。",
+				"新增了二战德军和苏军枪械。"
+			]
+		}
+	};
+	var lang = "ko";
+	var tipIndex = Math.floor(Math.random() * TEXT.ko.tips.length);
+	var shownTip = -1;
+	var statusFromGame = false;
+	var maxPlayers = "";
+	var lastFile = "";
 
 	// Progress: Garry's Mod only reports file counts for the FastDL step, which made
 	// the bar sit at 1% through the workshop step and then jump. The load is split
@@ -132,14 +227,14 @@
 	// inside a stage the bar follows real counts when there are any (workshop
 	// "3/57", files left) and otherwise creeps slowly towards the stage's end, so
 	// it always moves and never goes backwards. It stops short of 100%: the screen
-	// closes when loading is done.
+	// closes when loading is done. Stage names are in TEXT[lang].stages.
 	var STAGES = [
-		{ name: "접속", from: 0, to: 4, tau: 4 },
-		{ name: "워크샵 애드온", from: 4, to: 55, tau: 40 },
-		{ name: "서버 정보", from: 55, to: 60, tau: 4 },
-		{ name: "파일 받기", from: 60, to: 80, tau: 15 },
-		{ name: "Lua 받기", from: 80, to: 92, tau: 10 },
-		{ name: "게임 시작", from: 92, to: 99, tau: 12 }
+		{ from: 0, to: 4, tau: 4 },
+		{ from: 4, to: 55, tau: 40 },
+		{ from: 55, to: 60, tau: 4 },
+		{ from: 60, to: 80, tau: 15 },
+		{ from: 80, to: 92, tau: 10 },
+		{ from: 92, to: 99, tau: 12 }
 	];
 	var stage = 0;
 	var stageStart = new Date().getTime();
@@ -153,13 +248,49 @@
 	function byId(id) { return document.getElementById(id); }
 	function setText(id, text) { var el = byId(id); if (el) { el.innerHTML = ""; el.appendChild(document.createTextNode(text)); } }
 
+	function T(key) {
+		var t = TEXT[lang] || TEXT.en;
+		return t[key] !== undefined ? t[key] : TEXT.en[key];
+	}
+
+	// gmod_language / browser language -> ko, en, ru, zh (null: none of them).
+	function normLang(value) {
+		var v = String(value || "").toLowerCase();
+		if (v.indexOf("ko") === 0 || v === "kr" || v.indexOf("korean") >= 0) return "ko";
+		if (v.indexOf("zh") === 0 || v === "cn" || v === "tw" || v === "hk" || v.indexOf("chinese") >= 0) return "zh";
+		if (v.indexOf("ru") === 0 || v.indexOf("russian") >= 0) return "ru";
+		if (v.indexOf("en") === 0 || v.indexOf("english") >= 0) return "en";
+		return null;
+	}
+
+	function applyLang(l) {
+		lang = TEXT[l] ? l : "en";
+		document.documentElement.lang = lang;
+		document.body.className = "lang-" + lang;
+		setText("tagline", T("tagline"));
+		byId("qr").alt = T("qrAlt");
+		setText("qrcap", T("qrcap"));
+		setText("lbl_server", T("server"));
+		setText("lbl_map", T("map"));
+		setText("lbl_players", T("players"));
+		if (maxPlayers) setText("players", T("playersValue").replace("%n", maxPlayers));
+		setText("tiptitle", T("tipTitle"));
+		if (!statusFromGame) setText("status", T("connecting"));
+		if (lastFile) setText("file", T("downloading") + lastFile);
+		setText("hint", T("hint"));
+		if (shownTip >= 0) setText("tip", T("tips")[shownTip % T("tips").length]);
+		render();
+	}
+
 	function showTip() {
 		var el = byId("tip");
 		el.style.opacity = 0;
 		setTimeout(function () {
-			setText("tip", TIPS[tipIndex]);
+			var tips = T("tips");
+			shownTip = tipIndex % tips.length;
+			setText("tip", tips[shownTip]);
 			el.style.opacity = 1;
-			tipIndex = (tipIndex + 1) % TIPS.length;
+			tipIndex = (shownTip + 1) % tips.length;
 		}, 450);
 	}
 
@@ -195,9 +326,10 @@
 		if (shown > 99) shown = 99;
 		byId("fill").style.width = shown.toFixed(1) + "%";
 
-		var detail = s.name + " (" + (stage + 1) + "/" + STAGES.length + ")";
-		if (stage === 1 && wsTotal > 0) detail = s.name + " " + wsDone + " / " + wsTotal;
-		if (stage === 3 && totalFiles > 0) detail = s.name + " " + Math.max(totalFiles - neededFiles, downloaded, 0) + " / " + totalFiles;
+		var name = T("stages")[stage];
+		var detail = name + " (" + (stage + 1) + "/" + STAGES.length + ")";
+		if (stage === 1 && wsTotal > 0) detail = name + " " + wsDone + " / " + wsTotal;
+		if (stage === 3 && totalFiles > 0) detail = name + " " + Math.max(totalFiles - neededFiles, downloaded, 0) + " / " + totalFiles;
 		setText("percent", Math.floor(shown) + "%  ·  " + detail);
 	}
 
@@ -211,18 +343,23 @@
 		if (/lua|received all|no files to request/.test(t)) return 4;
 		if (/client info|sending/.test(t)) return 2;
 		if (/workshop complete/.test(t)) return 2;
-		if (/^\s*\d+\s*\/\s*\d+|workshop|addon|mount|워크샵|애드온/.test(t)) return 1;
+		if (/^\s*\d+\s*\/\s*\d+|workshop|addon|mount|워크샵|애드온|мастерск|аддон|工坊|模组|插件/.test(t)) return 1;
 		// Before the server-info step a download is a workshop addon, after it a FastDL file.
-		if (/download|files|파일/.test(t)) return stage < 2 ? 1 : 3;
-		if (/retriev|server info|connect|접속/.test(t)) return 0;
+		if (/download|files|파일|загруз|скачив|файл|下载|文件/.test(t)) return stage < 2 ? 1 : 3;
+		if (/retriev|server info|connect|접속|подключ|连接/.test(t)) return 0;
 		return -1;
 	}
 
 	// Called by Garry's Mod.
-	function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+	var forcedLang = (function () {
+		var m = /[?&]lang=([a-zA-Z_\-]+)/.exec(window.location.search || "");
+		return m ? normLang(m[1]) : null;
+	})();
+	function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
 		if (servername) setText("server", servername);
 		if (mapname) setText("map", mapname);
-		if (maxplayers) setText("players", maxplayers + "명");
+		if (maxplayers) { maxPlayers = String(maxplayers); setText("players", T("playersValue").replace("%n", maxPlayers)); }
+		if (!forcedLang && language) applyLang(normLang(language) || "en");
 	}
 	function SetFilesTotal(total) {
 		totalFiles = Number(total) || 0;
@@ -234,11 +371,13 @@
 	}
 	function DownloadingFile(fileName) {
 		downloaded++;
-		setText("file", "받는 중: " + fileName);
+		lastFile = String(fileName);
+		setText("file", T("downloading") + lastFile);
 		if (stage >= 2) goStage(3);
 	}
 	function SetStatusChanged(status) {
 		if (!status) return;
+		statusFromGame = true;
 		setText("status", status);
 		var text = String(status);
 		var i = stageOf(text);
@@ -256,9 +395,14 @@
 		}
 	}
 
+	(function () {
+		var nav = normLang(navigator.language || navigator.userLanguage || "");
+		// An English browser says little (embedded browsers often report en-US):
+		// stay Korean until Garry's Mod tells the real language.
+		applyLang(forcedLang || (nav && nav !== "en" ? nav : "ko"));
+	})();
 	showTip();
 	setInterval(showTip, 7000);
-	render();
 	setInterval(render, 100);
 </script>
 </body>
